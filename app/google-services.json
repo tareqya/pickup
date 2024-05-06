@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "577935779844",
+    "project_id": "pickup-fc7b4",
+    "storage_bucket": "pickup-fc7b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577935779844:android:fd9332b778a1d2666a2d51",
+        "android_client_info": {
+          "package_name": "com.example.pickup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkS9i-V1t0P5n1TXFfR79lBlVFUM9MXyo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

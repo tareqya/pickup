@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFetchUserComplete(User user) {
                 currentUser = user;
                 profileFragment.setCurrentUser(user);
+                sellersFragment.setCurrentUser(user);
             }
         });
 

@@ -8,7 +8,7 @@ public class User extends FirebaseId implements Serializable {
     private String email;
     private String imagePath;
     private String imageUrl;
-    private int score;
+    private double score;
 
     public String getFirstName() {
         return firstName;
@@ -37,11 +37,11 @@ public class User extends FirebaseId implements Serializable {
         return this;
     }
 
-    public int getScore() {
+    public double getScore() {
         return score;
     }
 
-    public User setScore(int score) {
+    public User setScore(double score) {
         this.score = score;
         return this;
     }

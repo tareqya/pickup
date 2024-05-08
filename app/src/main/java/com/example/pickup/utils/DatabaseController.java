@@ -6,11 +6,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.pickup.callbacks.AuthCallBack;
+import com.example.pickup.callbacks.ImageUrlDownloadListener;
+import com.example.pickup.callbacks.ProductCallBack;
 import com.example.pickup.callbacks.SellerCallBack;
 import com.example.pickup.callbacks.UserCallBack;
+import com.example.pickup.models.Product;
 import com.example.pickup.models.Seller;
 import com.example.pickup.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,10 +29,13 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DatabaseController {
     public static String USERS_TABLE = "Users";
     public static String SELLERS_TABLE = "Sellers";
+    public static String PRODUCTS_TABLE = "Products";
+
     private FirebaseAuth auth;
     private FirebaseFirestore mDatabase;
     private FirebaseStorage storage;
@@ -35,6 +43,7 @@ public class DatabaseController {
     private AuthCallBack authCallBack;
     private UserCallBack userCallBack;
     private SellerCallBack sellerCallBack;
+    private ProductCallBack productCallBack;
 
     public DatabaseController(){
         this.auth = FirebaseAuth.getInstance();
@@ -50,6 +59,9 @@ public class DatabaseController {
     }
     public void setSellersCallBack(SellerCallBack sellerCallBack){
         this.sellerCallBack = sellerCallBack;
+    }
+    public void setProductCallBack(ProductCallBack productCallBack){
+        this.productCallBack = productCallBack;
     }
     public void loginUser(String email, String password){
 
@@ -93,25 +105,27 @@ public class DatabaseController {
                 if(value == null) return;
 
                 User user = value.toObject(User.class);
-                if(user.getImagePath() != null){
-                    String imageUrl = downloadImageUrl(user.getImagePath());
-                    user.setImageUrl(imageUrl);
-                }
                 user.setId(value.getId());
+                if(user.getImagePath() != null){
+                    downloadImageUrl(user.getImagePath(), new ImageUrlDownloadListener() {
+                        @Override
+                        public void onImageUrlDownloaded(String imageUrl) {
+                            user.setImageUrl(imageUrl);
+                            userCallBack.onFetchUserComplete(user);
+                        }
 
-                userCallBack.onFetchUserComplete(user);
+                        @Override
+                        public void onImageUrlDownloadFailed(String errorMessage) {
+
+                        }
+                    });
+                }
             }
         });
     }
 
     public void signOut(){
         this.auth.signOut();
-    }
-
-    public String downloadImageUrl(String imagePath){
-        Task<Uri> downloadImageTask = this.storage.getReference().child(imagePath).getDownloadUrl();
-        while (!downloadImageTask.isComplete() && !downloadImageTask.isCanceled());
-        return downloadImageTask.getResult().toString();
     }
 
     public boolean uploadImage(Uri imageUri, String imagePath){
@@ -124,6 +138,59 @@ public class DatabaseController {
             return false;
         }
 
+    }
+    public void downloadImageUrl(String imagePath, ImageUrlDownloadListener listener){
+        this.storage.getReference().child(imagePath).getDownloadUrl()
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        listener.onImageUrlDownloaded(uri.toString());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        listener.onImageUrlDownloadFailed(e.getMessage());
+                    }
+                });
+    }
+
+    public void fetchAllProducts(){
+        this.mDatabase.collection(PRODUCTS_TABLE).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (value == null) return;
+
+                AtomicInteger count = new AtomicInteger(value.size() - 1);
+                ArrayList<Product> products = new ArrayList<>();
+                for(DocumentSnapshot snapshot: value.getDocuments()){
+                    Product product = snapshot.toObject(Product.class);
+                    if(product.getImagePath() != null){
+                        downloadImageUrl(product.getImagePath(), new ImageUrlDownloadListener() {
+                            @Override
+                            public void onImageUrlDownloaded(String imageUrl) {
+                                product.setImageUrl(imageUrl);
+                                products.add(product);
+
+                                if(count.getAndDecrement() == 0){
+                                    productCallBack.onFetchProductsComplete(products);
+                                }
+                            }
+
+                            @Override
+                            public void onImageUrlDownloadFailed(String errorMessage) {
+                                // Handle download failure
+                            }
+                        });
+                    } else {
+                        products.add(product);
+                        if (count.decrementAndGet() == 0) {
+                            productCallBack.onFetchProductsComplete(products);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     public void fetchAllSellers(){
@@ -143,4 +210,6 @@ public class DatabaseController {
             }
         });
     }
+
+
 }

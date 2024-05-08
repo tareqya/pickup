@@ -29,7 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 
 public class SellersFragment extends Fragment {
-    public static double SCORE = 100;
+    public static double SCORE = 10;
     private Context context;
     private RecyclerView fSellers_RV_sellers;
     private FloatingActionButton fSellers_FAB_AddCode;

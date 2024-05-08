@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 currentUser = user;
                 profileFragment.setCurrentUser(user);
                 sellersFragment.setCurrentUser(user);
+                storeFragment.setCurrentUser(user);
             }
         });
 

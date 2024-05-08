@@ -1,5 +1,7 @@
 package com.example.pickup.models;
 
+import com.google.firebase.firestore.Exclude;
+
 import java.io.Serializable;
 
 public class User extends FirebaseId implements Serializable {
@@ -54,7 +56,7 @@ public class User extends FirebaseId implements Serializable {
         this.imagePath = imagePath;
         return this;
     }
-
+    @Exclude
     public String getImageUrl() {
         return imageUrl;
     }

@@ -19,7 +19,7 @@
             android:id="@+id/profileUpdate_image"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:src="@drawable/icon"
+            android:src="@drawable/profile"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.536"

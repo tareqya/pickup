@@ -19,6 +19,8 @@ import com.example.pickup.auth.LoginActivity;
 import com.example.pickup.models.User;
 import com.example.pickup.utils.DatabaseController;
 
+import java.text.DecimalFormat;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileFragment extends Fragment {
@@ -87,7 +89,11 @@ public class ProfileFragment extends Fragment {
         if(this.currentUser.getImageUrl() != null){
             Glide.with(context).load(this.currentUser.getImageUrl()).into(profile_CIV_image);
         }
-        profile_TV_score.setText(this.currentUser.getScore() + "");
+        // Create a DecimalFormat object with the desired pattern
+        DecimalFormat df = new DecimalFormat("#.##"); // Two digits after the decimal point
+        // Format the number using DecimalFormat
+        String formattedNumber = df.format(this.currentUser.getScore());
+        profile_TV_score.setText(formattedNumber);
         String fullName = this.currentUser.getFirstName() + " " +this.currentUser.getLastName();
         profile_TV_name.setText(fullName);
 
